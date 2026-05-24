@@ -41,6 +41,24 @@ Version 0.1 supports:
 - `@wallet-association/transport-localhost`: localhost discovery and HTTP transport
 - `@wallet-association/wallet-standard`: Wallet Standard adapter
 
+## Reference Implementations
+
+The TypeScript packages are the reference dapp/client implementation. They own
+browser crypto, localhost transport calls, session storage, and Wallet Standard
+adaptation.
+
+The Swift package in [`swift/`](./swift) is the Apple wallet/server reference
+implementation. It owns protocol types, crypto, envelopes, session authorization
+helpers, Keychain session token storage, and the localhost bridge server. Wallet
+apps still own UI prompts, signing, account mapping, network policy, and settings
+screens.
+
+Native can consume the local Swift package with:
+
+```swift
+.package(path: "../wallet-association-protocol/swift")
+```
+
 ## Specs
 
 - [Association v0.1](./specs/association-v0.1.md)
