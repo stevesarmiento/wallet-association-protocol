@@ -39,6 +39,30 @@ final class LocalAssociationBridgeTests: XCTestCase {
         XCTAssertEqual(response.headers["access-control-allow-methods"], "GET, POST, OPTIONS")
         XCTAssertEqual(response.headers["access-control-allow-headers"], "Content-Type")
         XCTAssertNil(response.headers["access-control-allow-credentials"])
+        XCTAssertTrue(response.body.isEmpty)
+    }
+
+    func testOriginValidationIsStrict() {
+        XCTAssertTrue(LocalhostCORS.isValidBrowserOrigin("https://app.example"))
+        XCTAssertTrue(LocalhostCORS.isValidBrowserOrigin("https://app.example:443"))
+        XCTAssertTrue(LocalhostCORS.isValidBrowserOrigin("http://localhost:3000"))
+
+        XCTAssertFalse(LocalhostCORS.isValidBrowserOrigin(""))
+        XCTAssertFalse(LocalhostCORS.isValidBrowserOrigin("null"))
+        XCTAssertFalse(LocalhostCORS.isValidBrowserOrigin("file:///tmp/app.html"))
+        XCTAssertFalse(LocalhostCORS.isValidBrowserOrigin("https://app.example/path"))
+        XCTAssertFalse(LocalhostCORS.isValidBrowserOrigin("https://app.example?x=1"))
+        XCTAssertFalse(LocalhostCORS.isValidBrowserOrigin("https://user:pass@app.example"))
+        XCTAssertFalse(LocalhostCORS.isValidBrowserOrigin("https://app.example:bad"))
+    }
+
+    func testInvalidOriginDoesNotReceiveCORSHeaders() async throws {
+        let harness = try await AssociationHarness()
+        let response = try await harness.request(method: "OPTIONS", path: "/v2/associate", origin: "null")
+
+        XCTAssertEqual(response.status, 204)
+        XCTAssertNil(response.headers["access-control-allow-origin"])
+        XCTAssertNil(response.headers["access-control-allow-credentials"])
     }
 
     func testHandshakeRejectsMissingOrigin() async throws {
@@ -68,12 +92,124 @@ final class LocalAssociationBridgeTests: XCTestCase {
         XCTAssertEqual(try response.errorCode(), "invalid_origin")
     }
 
+    func testPostWithoutContentLengthReturnsMalformedRequest() async throws {
+        let harness = try await AssociationHarness()
+        let response = try await harness.rawRequest(
+            method: "POST",
+            path: "/v2/handshake",
+            origin: origin,
+            headers: ["Content-Type": "application/json"],
+            body: Data("{}".utf8),
+            includeContentLength: false
+        )
+
+        XCTAssertEqual(response.status, 400)
+        XCTAssertEqual(try response.errorCode(), "malformed_request")
+    }
+
+    func testPostWithInvalidContentLengthReturnsMalformedRequest() async throws {
+        let harness = try await AssociationHarness()
+        let response = try await harness.rawRequest(
+            method: "POST",
+            path: "/v2/handshake",
+            origin: origin,
+            headers: ["Content-Type": "application/json", "Content-Length": "nope"],
+            body: Data("{}".utf8),
+            includeContentLength: false
+        )
+
+        XCTAssertEqual(response.status, 400)
+        XCTAssertEqual(try response.errorCode(), "malformed_request")
+    }
+
+    func testOversizedPostReturnsRequestTooLarge() async throws {
+        let harness = try await AssociationHarness(configuration: LocalAssociationBridgeConfiguration(port: 0, maxBodyBytes: 8))
+        let response = try await harness.rawRequest(
+            method: "POST",
+            path: "/v2/handshake",
+            origin: origin,
+            headers: ["Content-Type": "application/json"],
+            body: Data(repeating: UInt8(ascii: "x"), count: 9)
+        )
+
+        XCTAssertEqual(response.status, 413)
+        XCTAssertEqual(try response.errorCode(), "request_too_large")
+    }
+
+    func testHugeRequestReturnsRequestTooLarge() async throws {
+        let harness = try await AssociationHarness(configuration: LocalAssociationBridgeConfiguration(port: 0, maxRequestBytes: 96, maxBodyBytes: 64))
+        let response = try await harness.rawRequest(
+            method: "POST",
+            path: "/v2/handshake",
+            origin: origin,
+            headers: ["Content-Type": "application/json", "X-Fill": String(repeating: "x", count: 128)],
+            body: Data("{}".utf8)
+        )
+
+        XCTAssertEqual(response.status, 413)
+        XCTAssertEqual(try response.errorCode(), "request_too_large")
+    }
+
+    func testJSONContentTypeWithCharsetIsAcceptedAndTextPlainRejected() async throws {
+        let harness = try await AssociationHarness()
+        let dappKey = AssociationCrypto.makePrivateKey()
+        let body = try harness.encoder.encode(AssociationHandshakeRequest(
+            protocolVersion: "2",
+            dappPublicKeyBase64: AssociationCrypto.publicKeyBase64(for: dappKey),
+            metadata: AssociationRequestMetadata(origin: origin)
+        ))
+
+        let accepted = try await harness.rawRequest(
+            method: "POST",
+            path: "/v2/handshake",
+            origin: origin,
+            headers: ["Content-Type": "application/json; charset=utf-8"],
+            body: body
+        )
+        XCTAssertEqual(accepted.status, 200)
+
+        let rejected = try await harness.rawRequest(
+            method: "POST",
+            path: "/v2/handshake",
+            origin: origin,
+            headers: ["Content-Type": "text/plain"],
+            body: body
+        )
+        XCTAssertEqual(rejected.status, 400)
+        XCTAssertEqual(try rejected.errorCode(), "malformed_request")
+    }
+
     func testHandshakeReturnsWalletPublicKeyAndId() async throws {
         let harness = try await AssociationHarness()
         let session = try await harness.handshake(origin: origin)
 
         XCTAssertFalse(session.handshake.handshakeId.isEmpty)
         XCTAssertEqual(Data(base64Encoded: session.handshake.walletPublicKeyBase64)?.count, 32)
+    }
+
+    func testPendingHandshakeCapEvictsOldestHandshake() async throws {
+        let delegate = TestAssociationDelegate()
+        let harness = try await AssociationHarness(
+            configuration: LocalAssociationBridgeConfiguration(port: 0, maxPendingHandshakes: 1),
+            delegate: delegate
+        )
+        let first = try await harness.handshake(origin: origin)
+        let second = try await harness.handshake(origin: origin)
+
+        let evicted = try await harness.associateResponse(
+            AssociationRequestPayload(kind: .create),
+            origin: origin,
+            session: first
+        )
+        XCTAssertEqual(evicted.status, 400)
+        XCTAssertEqual(try evicted.errorCode(), "malformed_request")
+
+        let accepted = try await harness.associateResponse(
+            AssociationRequestPayload(kind: .create),
+            origin: origin,
+            session: second
+        )
+        XCTAssertEqual(accepted.status, 200)
     }
 
     func testAssociateRejectsUnknownHandshake() async throws {
@@ -164,6 +300,36 @@ final class LocalAssociationBridgeTests: XCTestCase {
 
         XCTAssertEqual(response.status, 403)
         XCTAssertEqual(try response.errorCode(), "session_invalid")
+    }
+
+    func testRPCRejectsMalformedAndWrongLengthSessionTokens() async throws {
+        let delegate = TestAssociationDelegate()
+        let harness = try await AssociationHarness(delegate: delegate)
+
+        let malformed = AssociationRPCRequestPayload(
+            requestId: "malformed-token",
+            issuedAt: Date(),
+            sessionTokenBase64: "not base64",
+            method: "solana.signMessage",
+            params: .signMessage(AssociationSignMessageParams(accountAddress: "account", messageBase64: "aGVsbG8="))
+        )
+        let malformedResponse = try await harness.rpcResponse(
+            sessionId: delegate.sessionId,
+            sessionToken: delegate.sessionToken,
+            origin: origin,
+            payload: malformed
+        )
+        XCTAssertEqual(malformedResponse.status, 403)
+        XCTAssertEqual(try malformedResponse.errorCode(), "session_invalid")
+
+        let wrongLength = try await harness.rpcResponse(
+            sessionId: delegate.sessionId,
+            sessionToken: delegate.sessionToken,
+            origin: origin,
+            payload: .message(requestId: "short-token", token: Data(repeating: 7, count: 31))
+        )
+        XCTAssertEqual(wrongLength.status, 403)
+        XCTAssertEqual(try wrongLength.errorCode(), "session_invalid")
     }
 
     func testRPCRejectsDuplicateRequestId() async throws {
@@ -335,12 +501,15 @@ private struct HandshakeSession {
 private final class AssociationHarness {
     private let bridge: LocalAssociationBridge
     private let delegate: LocalAssociationBridgeDelegate
-    private let encoder = JSONEncoder()
+    let encoder = JSONEncoder()
     private let decoder = JSONDecoder()
 
-    init(delegate: LocalAssociationBridgeDelegate = TestAssociationDelegate()) async throws {
+    init(
+        configuration: LocalAssociationBridgeConfiguration = LocalAssociationBridgeConfiguration(port: 0),
+        delegate: LocalAssociationBridgeDelegate = TestAssociationDelegate()
+    ) async throws {
         self.delegate = delegate
-        self.bridge = LocalAssociationBridge(port: 0, delegate: delegate)
+        self.bridge = LocalAssociationBridge(configuration: configuration, delegate: delegate)
         encoder.dateEncodingStrategy = .iso8601
         decoder.dateDecodingStrategy = .iso8601
         try bridge.start()
@@ -388,6 +557,10 @@ private final class AssociationHarness {
     func associateResponse(_ payload: AssociationRequestPayload, origin: String) async throws -> BridgeHTTPResponse {
         let session = try await handshake(origin: origin)
         pendingAssociations[session.handshake.handshakeId] = session
+        return try await associateResponse(payload, origin: origin, session: session)
+    }
+
+    func associateResponse(_ payload: AssociationRequestPayload, origin: String, session: HandshakeSession) async throws -> BridgeHTTPResponse {
         let sealed = try AssociationCrypto.seal(payload, key: session.key, encoder: encoder)
         let envelope = AssociationEnvelope(
             protocolVersion: "2",
@@ -406,7 +579,7 @@ private final class AssociationHarness {
         let response = try await rpcResponse(sessionId: sessionId, sessionToken: sessionToken, origin: origin, payload: payload)
         XCTAssertEqual(response.status, 200)
         let envelope = try decoder.decode(AssociationEnvelope.self, from: response.body)
-        let key = AssociationCrypto.sessionKey(sessionToken: sessionToken, sessionId: sessionId, origin: origin)
+        let key = try AssociationCrypto.sessionKey(sessionToken: sessionToken, sessionId: sessionId, origin: origin)
         return try AssociationCrypto.open(
             AssociationRPCResponsePayload.self,
             sealedBoxBase64: envelope.sealedBoxBase64,
@@ -421,7 +594,7 @@ private final class AssociationHarness {
         origin: String,
         payload: AssociationRPCRequestPayload
     ) async throws -> BridgeHTTPResponse {
-        let key = AssociationCrypto.sessionKey(sessionToken: sessionToken, sessionId: sessionId, origin: origin)
+        let key = try AssociationCrypto.sessionKey(sessionToken: sessionToken, sessionId: sessionId, origin: origin)
         let sealed = try AssociationCrypto.seal(payload, key: key, encoder: encoder)
         let envelope = AssociationEnvelope(protocolVersion: "2", keyId: sessionId, sealedBoxBase64: sealed)
         return try await jsonRequest(method: "POST", path: "/v2/rpc", origin: origin, body: envelope)
@@ -438,16 +611,30 @@ private final class AssociationHarness {
     }
 
     func request(method: String, path: String, origin: String? = nil, body: Data? = nil) async throws -> BridgeHTTPResponse {
+        try await rawRequest(method: method, path: path, origin: origin, headers: [:], body: body)
+    }
+
+    func rawRequest(
+        method: String,
+        path: String,
+        origin: String? = nil,
+        headers: [String: String],
+        body: Data? = nil,
+        includeContentLength: Bool = true
+    ) async throws -> BridgeHTTPResponse {
         var head = "\(method) \(path) HTTP/1.1\r\n"
         head += "Host: 127.0.0.1:\(bridge.port)\r\n"
         if let origin {
             head += "Origin: \(origin)\r\n"
         }
-        if let body {
+        for (key, value) in headers {
+            head += "\(key): \(value)\r\n"
+        }
+        if body != nil, headers.keys.first(where: { $0.caseInsensitiveCompare("Content-Type") == .orderedSame }) == nil {
             head += "Content-Type: application/json\r\n"
-            head += "Content-Length: \(body.count)\r\n"
-        } else {
-            head += "Content-Length: 0\r\n"
+        }
+        if includeContentLength, headers.keys.first(where: { $0.caseInsensitiveCompare("Content-Length") == .orderedSame }) == nil {
+            head += "Content-Length: \(body?.count ?? 0)\r\n"
         }
         head += "Connection: close\r\n\r\n"
 

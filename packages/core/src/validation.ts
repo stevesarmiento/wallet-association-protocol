@@ -9,6 +9,7 @@ import {
   type AssociationResponsePayload
 } from "./protocol";
 import { isSolanaChain } from "./protocol";
+import { isValidSessionTokenBase64 } from "./session";
 
 export { isAssociationEnvelope };
 
@@ -54,7 +55,7 @@ export function isAssociationResponsePayload(value: unknown): value is Associati
   const payload = value as Partial<AssociationResponsePayload>;
   return (
     typeof payload.sessionId === "string" &&
-    typeof payload.sessionTokenBase64 === "string" &&
+    isValidSessionTokenBase64(payload.sessionTokenBase64) &&
     typeof payload.expiresAt === "string" &&
     Array.isArray(payload.accounts) &&
     Array.isArray(payload.chains) &&
@@ -69,7 +70,7 @@ export function isAssociationRPCRequestPayload(value: unknown): value is Associa
   return (
     typeof payload.requestId === "string" &&
     typeof payload.issuedAt === "string" &&
-    typeof payload.sessionTokenBase64 === "string" &&
+    isValidSessionTokenBase64(payload.sessionTokenBase64) &&
     (payload.method === "solana.signMessage" || payload.method === "solana.signTransaction") &&
     typeof payload.params === "object" &&
     payload.params !== null

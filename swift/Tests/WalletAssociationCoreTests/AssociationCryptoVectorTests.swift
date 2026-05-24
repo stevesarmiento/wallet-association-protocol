@@ -22,7 +22,7 @@ final class AssociationCryptoVectorTests: XCTestCase {
     func testSwiftCryptoMatchesSessionVector() throws {
         let vector = try loadVector(SigningRPCVector.self, named: "sign-message-rpc")
         let sessionToken = try XCTUnwrap(Data(base64Encoded: vector.sessionTokenBase64))
-        let sessionKey = AssociationCrypto.sessionKey(
+        let sessionKey = try AssociationCrypto.sessionKey(
             sessionToken: sessionToken,
             sessionId: vector.sessionId,
             origin: vector.origin
@@ -84,7 +84,7 @@ final class AssociationEnvelopeVectorTests: XCTestCase {
         let invalid = try loadVector(InvalidEnvelopeVector.self, named: "invalid-envelope")
         let messageVector = try loadVector(SigningRPCVector.self, named: "sign-message-rpc")
         let token = try XCTUnwrap(Data(base64Encoded: messageVector.sessionTokenBase64))
-        let key = AssociationCrypto.sessionKey(sessionToken: token, sessionId: messageVector.sessionId, origin: messageVector.origin)
+        let key = try AssociationCrypto.sessionKey(sessionToken: token, sessionId: messageVector.sessionId, origin: messageVector.origin)
 
         XCTAssertThrowsError(try AssociationCrypto.open(
             AssociationRPCRequestPayload.self,
@@ -97,7 +97,7 @@ final class AssociationEnvelopeVectorTests: XCTestCase {
     private static func assertSigningVector(named name: String, expectedMethod: String) throws {
         let vector = try loadVector(SigningRPCVector.self, named: name)
         let token = try XCTUnwrap(Data(base64Encoded: vector.sessionTokenBase64))
-        let key = AssociationCrypto.sessionKey(sessionToken: token, sessionId: vector.sessionId, origin: vector.origin)
+        let key = try AssociationCrypto.sessionKey(sessionToken: token, sessionId: vector.sessionId, origin: vector.origin)
         let request = try AssociationCrypto.open(
             AssociationRPCRequestPayload.self,
             sealedBoxBase64: vector.request.envelope.sealedBoxBase64,

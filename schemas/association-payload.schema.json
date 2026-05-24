@@ -31,7 +31,7 @@
         "requestedChains": { "type": "array", "items": { "type": "string" } },
         "requestedFeatures": { "type": "array", "items": { "type": "string" } },
         "resumeSessionId": { "type": "string" },
-        "resumeSessionTokenBase64": { "type": "string" }
+        "resumeSessionTokenBase64": { "type": "string", "minLength": 44, "maxLength": 44 }
       }
     },
     {
@@ -40,7 +40,7 @@
       "additionalProperties": false,
       "properties": {
         "sessionId": { "type": "string" },
-        "sessionTokenBase64": { "type": "string" },
+        "sessionTokenBase64": { "type": "string", "minLength": 44, "maxLength": 44 },
         "expiresAt": { "type": "string", "format": "date-time" },
         "accounts": { "type": "array", "items": { "$ref": "#/$defs/account" } },
         "chains": { "type": "array", "items": { "type": "string" } },

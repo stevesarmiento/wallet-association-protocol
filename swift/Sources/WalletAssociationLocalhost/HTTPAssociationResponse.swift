@@ -51,6 +51,8 @@ enum HTTPAssociationResponse {
                 return self.error(status: 400, code: "unsupported_method", message: associationError.localizedDescription, encoder: encoder, request: request)
             case .invalidHandshake, .invalidEnvelope, .malformedRequest:
                 return self.error(status: 400, code: "malformed_request", message: associationError.localizedDescription, encoder: encoder, request: request)
+            case .requestTooLarge:
+                return self.error(status: 413, code: "request_too_large", message: associationError.localizedDescription, encoder: encoder, request: request)
             case .unavailable:
                 return self.error(status: 503, code: "bridge_unavailable", message: associationError.localizedDescription, encoder: encoder, request: request)
             default:
@@ -67,9 +69,9 @@ enum HTTPAssociationResponse {
         case 400: "Bad Request"
         case 403: "Forbidden"
         case 404: "Not Found"
+        case 413: "Payload Too Large"
         case 503: "Service Unavailable"
         default: "Error"
         }
     }
 }
-

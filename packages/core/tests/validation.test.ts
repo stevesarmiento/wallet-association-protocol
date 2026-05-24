@@ -9,6 +9,8 @@ import {
   type AssociationDiscoverResponse
 } from "../src";
 
+const validToken = tokenBase64(32);
+
 const discovery: AssociationDiscoverResponse = {
   name: "Native Wallet",
   version: "0.1.0",
@@ -43,7 +45,7 @@ describe("protocol validation", () => {
       validateAssociationRPCRequestPayload({
         requestId: "request",
         issuedAt: "2026-05-24T00:00:00.000Z",
-        sessionTokenBase64: "token",
+        sessionTokenBase64: validToken,
         method: "solana.signMessage",
         params: { accountAddress: "address", messageBase64: "AA==" }
       }).method
@@ -52,10 +54,26 @@ describe("protocol validation", () => {
       validateAssociationRPCRequestPayload({
         requestId: "request",
         issuedAt: "2026-05-24T00:00:00.000Z",
-        sessionTokenBase64: "token",
+        sessionTokenBase64: validToken,
         method: "solana.unsupported",
         params: { accountAddress: "address" }
       })
     ).toThrow("Invalid association RPC request payload");
   });
+
+  it("rejects invalid session token lengths in RPC payloads", () => {
+    expect(() =>
+      validateAssociationRPCRequestPayload({
+        requestId: "request",
+        issuedAt: "2026-05-24T00:00:00.000Z",
+        sessionTokenBase64: tokenBase64(31),
+        method: "solana.signMessage",
+        params: { accountAddress: "address", messageBase64: "AA==" }
+      })
+    ).toThrow("Invalid association RPC request payload");
+  });
 });
+
+function tokenBase64(length: number): string {
+  return btoa(String.fromCharCode(...new Uint8Array(length).fill(7)));
+}

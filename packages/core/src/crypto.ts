@@ -3,6 +3,7 @@ import { x25519 } from "@noble/curves/ed25519";
 import { hkdf } from "@noble/hashes/hkdf";
 import { sha256 } from "@noble/hashes/sha256";
 import { WALLET_ASSOCIATION_PROTOCOL_VERSION, type AssociationEnvelope } from "./protocol";
+import { WALLET_ASSOCIATION_SESSION_TOKEN_BYTES } from "./session";
 
 const NONCE_LENGTH = 12;
 const textEncoder = new TextEncoder();
@@ -77,7 +78,7 @@ export function deriveHandshakeKey(input: {
 
 export function deriveSessionKey(input: { sessionTokenBase64: string; sessionId: string; origin: string }): Uint8Array {
   const sessionToken = decodeBase64(input.sessionTokenBase64);
-  if (sessionToken.length === 0) {
+  if (sessionToken.length !== WALLET_ASSOCIATION_SESSION_TOKEN_BYTES) {
     throw new Error("Invalid session token");
   }
   return deriveKey(sessionToken, `native-wallet-association-v2:${input.origin}:${input.sessionId}`, "session");

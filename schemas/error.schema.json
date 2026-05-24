@@ -10,7 +10,19 @@
       "required": ["code", "message"],
       "additionalProperties": false,
       "properties": {
-        "code": { "type": "string" },
+        "code": {
+          "enum": [
+            "invalid_origin",
+            "malformed_request",
+            "request_too_large",
+            "session_invalid",
+            "user_rejected",
+            "unsupported_method",
+            "unsupported_protocol",
+            "bridge_unavailable",
+            "not_found"
+          ]
+        },
         "message": { "type": "string" },
         "details": {}
       }

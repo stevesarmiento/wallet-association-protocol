@@ -76,9 +76,28 @@ public final class LocalAssociationBridge: @unchecked Sendable {
             if let data {
                 buffer.data.append(data)
             }
-            if let expected = HTTPAssociationRequest.expectedLength(in: buffer.data), buffer.data.count >= expected || isComplete {
+            do {
+                if let expected = try HTTPAssociationRequest.expectedLength(
+                    in: buffer.data,
+                    maxRequestBytes: configuration.maxRequestBytes,
+                    maxBodyBytes: configuration.maxBodyBytes
+                ), buffer.data.count >= expected || isComplete {
+                    Task {
+                        let response = await self.response(for: buffer.data)
+                        connection.send(content: response, completion: .contentProcessed { _ in
+                            connection.cancel()
+                        })
+                    }
+                    return
+                }
+            } catch {
                 Task {
-                    let response = await self.response(for: buffer.data)
+                    let request = try? HTTPAssociationRequest(
+                        data: buffer.data,
+                        maxRequestBytes: self.configuration.maxRequestBytes,
+                        maxBodyBytes: self.configuration.maxBodyBytes
+                    )
+                    let response = HTTPAssociationResponse.bridgeError(error, encoder: self.encoder, request: request)
                     connection.send(content: response, completion: .contentProcessed { _ in
                         connection.cancel()
                     })
@@ -95,7 +114,11 @@ public final class LocalAssociationBridge: @unchecked Sendable {
 
     private func response(for data: Data) async -> Data {
         do {
-            let request = try HTTPAssociationRequest(data: data)
+            let request = try HTTPAssociationRequest(
+                data: data,
+                maxRequestBytes: configuration.maxRequestBytes,
+                maxBodyBytes: configuration.maxBodyBytes
+            )
             if request.method == "OPTIONS" {
                 return HTTPAssociationResponse.response(status: 204, body: Data(), request: request)
             }
@@ -127,7 +150,11 @@ public final class LocalAssociationBridge: @unchecked Sendable {
                 return HTTPAssociationResponse.error(status: 404, code: "not_found", message: "not found", encoder: encoder, request: request)
             }
         } catch {
-            let request = try? HTTPAssociationRequest(data: data)
+            let request = try? HTTPAssociationRequest(
+                data: data,
+                maxRequestBytes: configuration.maxRequestBytes,
+                maxBodyBytes: configuration.maxBodyBytes
+            )
             return HTTPAssociationResponse.bridgeError(error, encoder: encoder, request: request)
         }
     }
@@ -151,12 +178,14 @@ public final class LocalAssociationBridge: @unchecked Sendable {
         let privateKey = AssociationCrypto.makePrivateKey()
         let expiresAt = Date().addingTimeInterval(AssociationProtocol.handshakeTtlSeconds)
         pruneExpiredHandshakes(now: Date())
+        evictPendingHandshakesIfNeeded()
         pendingHandshakes[handshakeId] = PendingHandshake(
             id: handshakeId,
             origin: origin,
             privateKey: privateKey,
             dappPublicKeyBase64: request.dappPublicKeyBase64,
             metadata: request.metadata,
+            createdAt: Date(),
             expiresAt: expiresAt
         )
         return AssociationHandshakeResponse(
@@ -208,14 +237,19 @@ public final class LocalAssociationBridge: @unchecked Sendable {
             throw WalletAssociationError.unavailable("bridge unavailable")
         }
         let token = try await delegate.associationSessionToken(sessionId: envelope.keyId, verifiedOrigin: origin).token
-        let key = AssociationCrypto.sessionKey(sessionToken: token, sessionId: envelope.keyId, origin: origin)
+        try AssociationToken.validate(token)
+        let key = try AssociationCrypto.sessionKey(sessionToken: token, sessionId: envelope.keyId, origin: origin)
         let payload = try AssociationCrypto.open(
             AssociationRPCRequestPayload.self,
             sealedBoxBase64: envelope.sealedBoxBase64,
             key: key,
             decoder: decoder
         )
-        guard let requestToken = Data(base64Encoded: payload.sessionTokenBase64), requestToken == token else {
+        guard let requestToken = Data(base64Encoded: payload.sessionTokenBase64) else {
+            throw WalletAssociationError.sessionTokenInvalid
+        }
+        try AssociationToken.validate(requestToken)
+        guard AssociationToken.constantTimeEquals(requestToken, token) else {
             throw WalletAssociationError.sessionTokenInvalid
         }
         try replayCache.validate(payload, sessionId: envelope.keyId)
@@ -229,6 +263,19 @@ public final class LocalAssociationBridge: @unchecked Sendable {
 
     private func pruneExpiredHandshakes(now: Date) {
         pendingHandshakes = pendingHandshakes.filter { $0.value.expiresAt > now }
+    }
+
+    private func evictPendingHandshakesIfNeeded() {
+        guard pendingHandshakes.count >= configuration.maxPendingHandshakes else { return }
+        let excessCount = pendingHandshakes.count - configuration.maxPendingHandshakes + 1
+        let evictedIds = pendingHandshakes
+            .values
+            .sorted { $0.createdAt < $1.createdAt }
+            .prefix(excessCount)
+            .map(\.id)
+        for id in evictedIds {
+            pendingHandshakes.removeValue(forKey: id)
+        }
     }
 
     private func validateProtocol(_ version: String) throws {
@@ -254,6 +301,7 @@ private struct PendingHandshake {
     let privateKey: Curve25519.KeyAgreement.PrivateKey
     let dappPublicKeyBase64: String
     let metadata: AssociationRequestMetadata?
+    let createdAt: Date
     let expiresAt: Date
 }
 

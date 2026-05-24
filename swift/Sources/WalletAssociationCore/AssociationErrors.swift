@@ -11,6 +11,7 @@ public enum WalletAssociationError: LocalizedError, Equatable {
     case replayDetected
     case unsupportedMethod(String)
     case malformedRequest
+    case requestTooLarge
     case userRejected
     case unavailable(String)
     case secureRandomUnavailable(OSStatus)
@@ -40,6 +41,8 @@ public enum WalletAssociationError: LocalizedError, Equatable {
             "Unsupported association RPC method: \(method)."
         case .malformedRequest:
             "Malformed association request."
+        case .requestTooLarge:
+            "Association request is too large."
         case .userRejected:
             "user rejected"
         case .unavailable(let message):
@@ -55,4 +58,3 @@ public enum WalletAssociationError: LocalizedError, Equatable {
         }
     }
 }
-

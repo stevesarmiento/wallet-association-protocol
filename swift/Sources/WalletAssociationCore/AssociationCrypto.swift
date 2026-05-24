@@ -34,8 +34,9 @@ public enum AssociationCrypto {
         )
     }
 
-    public static func sessionKey(sessionToken: Data, sessionId: String, origin: String) -> SymmetricKey {
-        HKDF<SHA256>.deriveKey(
+    public static func sessionKey(sessionToken: Data, sessionId: String, origin: String) throws -> SymmetricKey {
+        try AssociationToken.validate(sessionToken)
+        return HKDF<SHA256>.deriveKey(
             inputKeyMaterial: SymmetricKey(data: sessionToken),
             salt: Data("native-wallet-association-v2:\(origin):\(sessionId)".utf8),
             info: Data("session".utf8),

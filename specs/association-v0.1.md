@@ -196,6 +196,7 @@ Common v0.1 codes:
 
 - `invalid_origin`
 - `malformed_request`
+- `request_too_large`
 - `session_invalid`
 - `user_rejected`
 - `unsupported_method`
@@ -203,3 +204,5 @@ Common v0.1 codes:
 
 Dates are ISO-8601 strings. Binary values are base64 strings unless explicitly
 represented as byte arrays.
+
+Session tokens must be base64 strings that decode to exactly 32 bytes.

@@ -33,6 +33,23 @@ Access-Control-Allow-Headers: Content-Type
 
 Wallets must not include `Access-Control-Allow-Credentials`.
 
+The `Origin` value must be an exact browser origin: `http` or `https`, host,
+and optional port only. Wallets must reject `null`, `file:`, credentials, path,
+query, and fragment components.
+
+## Request Bounds
+
+Wallets must bound localhost request parsing. Recommended v0.1 defaults:
+
+- maximum request bytes: 65,536
+- maximum body bytes: 49,152
+- maximum pending handshakes: 256
+
+POST requests must include a valid non-negative `Content-Length` and a JSON
+content type (`application/json`, optionally with a charset parameter).
+Oversized requests should return `413 request_too_large`; malformed requests
+should return `400 malformed_request`.
+
 ## Privacy
 
 Localhost discovery can reveal whether a wallet app is installed or running.
