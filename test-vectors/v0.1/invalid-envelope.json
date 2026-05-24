@@ -1,0 +1,9 @@
+{
+  "description": "Malformed and wrong-key envelopes must be rejected.",
+  "malformed": {
+    "protocolVersion": "2",
+    "keyId": "session-v0.1-test",
+    "sealedBoxBase64": "bm90LWEtc2VhbGVkLWJveA=="
+  },
+  "expectedErrorCode": "MALFORMED_RESPONSE"
+}

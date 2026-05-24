@@ -1,0 +1,39 @@
+{
+  "origin": "https://app.example",
+  "sessionId": "session-v0.1-test",
+  "sessionTokenBase64": "QEFCQ0RFRkdISUpLTE1OT1BRUlNUVVZXWFlaW1xdXl8=",
+  "sessionKeyHex": "820b4286f307e0bf80b95974bf0a2db9d67b0e1912361b13d3831aaba8c994bb",
+  "request": {
+    "payload": {
+      "requestId": "message-request",
+      "issuedAt": "2026-05-24T00:00:00.000Z",
+      "sessionTokenBase64": "QEFCQ0RFRkdISUpLTE1OT1BRUlNUVVZXWFlaW1xdXl8=",
+      "method": "solana.signMessage",
+      "params": {
+        "accountAddress": "11111111111111111111111111111111",
+        "chain": "solana:devnet",
+        "messageBase64": "aGVsbG8="
+      }
+    },
+    "nonceHex": "303132333435363738393a3b",
+    "envelope": {
+      "protocolVersion": "2",
+      "keyId": "session-v0.1-test",
+      "sealedBoxBase64": "MDEyMzQ1Njc4OTo7lza+i18/OSSogC96CP8F5Rs3aCe5ZryH3FMtxXaz2NzHARjOcghgEW2mlDUyDn6EtZCHMFaAJhW700ehIyOJQo+6coVmV3gQB0xlGhZnxZLJWQ82gbL6my6/rmY/QvN8KyD/k4/0sp+O0STjioeLC3MI0e23Rfiym+Suy96uqt6nhGSZqJdwe+sBnwDIA83EfbnLUfCUrQu4HX2zDKeexTGCAVmd1XPwvvXtfEHS37SV8fJJPpoWFMfIgzQbNJhMGPrgutQpqaaZK1e0Zj7Ym4GWujyXDnb+Csl0wOCz1Uh+LdLxRRSRPnqX764B/qObvFJ+FqZDBs+3QqLtlVlPTG8iwQ98pkFODyG4xKsybd9Z5KsStM4XAtcAWvoCq0TPw2EvjZPAhaZm"
+    }
+  },
+  "response": {
+    "payload": {
+      "requestId": "message-request",
+      "result": {
+        "signatureBase64": "AQID"
+      }
+    },
+    "nonceHex": "3c3d3e3f4041424344454647",
+    "envelope": {
+      "protocolVersion": "2",
+      "keyId": "session-v0.1-test",
+      "sealedBoxBase64": "PD0+P0BBQkNERUZHHWfHEiTwIvmmwapFH0dPtUHACtHMkTNR6bj0tCod8qH6It1YMERjE8KqgL1+lpoY2F0iCYk3Yb5o8U90P4kQ1XcxXsKXi+EAJnzn9z6mhVSTFEA="
+    }
+  }
+}

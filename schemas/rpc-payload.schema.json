@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wallet-association.dev/schemas/v0.1/rpc-payload.schema.json",
+  "oneOf": [
+    {
+      "type": "object",
+      "required": ["requestId", "issuedAt", "sessionTokenBase64", "method", "params"],
+      "additionalProperties": false,
+      "properties": {
+        "requestId": { "type": "string" },
+        "issuedAt": { "type": "string", "format": "date-time" },
+        "sessionTokenBase64": { "type": "string" },
+        "method": { "enum": ["solana.signMessage", "solana.signTransaction"] },
+        "params": {
+          "type": "object",
+          "required": ["accountAddress"],
+          "additionalProperties": false,
+          "properties": {
+            "accountAddress": { "type": "string" },
+            "chain": { "type": "string" },
+            "messageBase64": { "type": "string" },
+            "transactionBase64": { "type": "string" }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": ["requestId", "result"],
+      "additionalProperties": false,
+      "properties": {
+        "requestId": { "type": "string" },
+        "result": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": ["signatureBase64"],
+              "additionalProperties": false,
+              "properties": { "signatureBase64": { "type": "string" } }
+            },
+            {
+              "type": "object",
+              "required": ["signedTransactionBase64", "signature"],
+              "additionalProperties": false,
+              "properties": {
+                "signedTransactionBase64": { "type": "string" },
+                "signature": { "type": "string" }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

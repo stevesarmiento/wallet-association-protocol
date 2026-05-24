@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wallet-association.dev/schemas/v0.1/association-payload.schema.json",
+  "$defs": {
+    "account": {
+      "type": "object",
+      "required": ["address", "publicKey", "chains", "features"],
+      "additionalProperties": false,
+      "properties": {
+        "address": { "type": "string" },
+        "publicKey": {
+          "oneOf": [
+            { "type": "string" },
+            { "type": "array", "items": { "type": "integer", "minimum": 0, "maximum": 255 } }
+          ]
+        },
+        "chains": { "type": "array", "items": { "type": "string" } },
+        "features": { "type": "array", "items": { "type": "string" } },
+        "label": { "type": "string" },
+        "icon": { "type": "string" }
+      }
+    }
+  },
+  "oneOf": [
+    {
+      "type": "object",
+      "required": ["kind"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "enum": ["create", "resume"] },
+        "requestedChains": { "type": "array", "items": { "type": "string" } },
+        "requestedFeatures": { "type": "array", "items": { "type": "string" } },
+        "resumeSessionId": { "type": "string" },
+        "resumeSessionTokenBase64": { "type": "string" }
+      }
+    },
+    {
+      "type": "object",
+      "required": ["sessionId", "sessionTokenBase64", "expiresAt", "accounts", "chains", "features", "signingPolicy"],
+      "additionalProperties": false,
+      "properties": {
+        "sessionId": { "type": "string" },
+        "sessionTokenBase64": { "type": "string" },
+        "expiresAt": { "type": "string", "format": "date-time" },
+        "accounts": { "type": "array", "items": { "$ref": "#/$defs/account" } },
+        "chains": { "type": "array", "items": { "type": "string" } },
+        "features": { "type": "array", "items": { "type": "string" } },
+        "signingPolicy": { "enum": ["prompt", "allowWithoutPrompt"] }
+      }
+    }
+  ]
+}

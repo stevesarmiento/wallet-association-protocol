@@ -1,0 +1,40 @@
+{
+  "origin": "https://app.example",
+  "sessionId": "session-v0.1-test",
+  "sessionTokenBase64": "QEFCQ0RFRkdISUpLTE1OT1BRUlNUVVZXWFlaW1xdXl8=",
+  "sessionKeyHex": "820b4286f307e0bf80b95974bf0a2db9d67b0e1912361b13d3831aaba8c994bb",
+  "request": {
+    "payload": {
+      "requestId": "transaction-request",
+      "issuedAt": "2026-05-24T00:00:00.000Z",
+      "sessionTokenBase64": "QEFCQ0RFRkdISUpLTE1OT1BRUlNUVVZXWFlaW1xdXl8=",
+      "method": "solana.signTransaction",
+      "params": {
+        "accountAddress": "11111111111111111111111111111111",
+        "chain": "solana:devnet",
+        "transactionBase64": "dHg="
+      }
+    },
+    "nonceHex": "48494a4b4c4d4e4f50515253",
+    "envelope": {
+      "protocolVersion": "2",
+      "keyId": "session-v0.1-test",
+      "sealedBoxBase64": "SElKS0xNTk9QUVJTM3yQmG2STYQ6U2LBMZ0tY8/mY5UoaMxxx+LhTdDzCIb9eKayDcLWNv67Uxwpro2b+0ocW/E35C2/Z4f08Xj45zwzjJJQnKVEU8124U5FTOmU13w62JeHmdWgNzV/Ca+7FOa15+7h2YzZ3StvXtYdw4s2+psdzQZwrJ88DnOhN9MMR2WHwz8e/ecG1biuJt5VwCmPegbuBjV0cIrusEJvaWbRWfaU16hvsgaz7PQAVfWspjMi4DoZWVYp6TN7LIfzVWbKyWKiHwq2qlgSCRH/R5sA1ASFTPFHlbCUr+yK7ebvaKEoqxsfmy87V9iCefukBxxgU20Hxm5X2KzyPBTB47zD3LfnGrP7kWO3GE3srT4QUGmElBIVXQoxuc416bgwRRtpc6g3lQvO8rYFRHmMa4Y="
+    }
+  },
+  "response": {
+    "payload": {
+      "requestId": "transaction-request",
+      "result": {
+        "signedTransactionBase64": "BAUG",
+        "signature": "signature"
+      }
+    },
+    "nonceHex": "5455565758595a5b5c5d5e5f",
+    "envelope": {
+      "protocolVersion": "2",
+      "keyId": "session-v0.1-test",
+      "sealedBoxBase64": "VFVWV1hZWltcXV5fkztSgb53ALsJPrljVa856fwwHWXc8gqdqFkzbgrz2d84OmFnwe1/NL5+hLPdwmb0zMfXTvkjPPgcNGNBEfQCYN8m8EvhbTyJIPg3SdLI+ge0qojeLyh6JKogvYs6aOZYQWdSwBBHBvxkz3RthMdoNkhlPda/ZaI="
+    }
+  }
+}

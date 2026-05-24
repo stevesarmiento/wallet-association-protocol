@@ -1,0 +1,27 @@
+{
+  "name": "wallet-association-protocol",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Transport-independent encrypted wallet session association protocol.",
+  "type": "module",
+  "scripts": {
+    "build": "pnpm -r build",
+    "type-check": "pnpm -r type-check",
+    "test": "pnpm -r test",
+    "clean": "pnpm -r clean",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.0",
+    "ajv": "^8.17.1",
+    "prettier": "^3.8.3",
+    "tsup": "^8.5.0",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.7"
+  },
+  "engines": {
+    "node": ">=20.18.0"
+  },
+  "packageManager": "pnpm@11.2.2"
+}

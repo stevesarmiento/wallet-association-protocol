@@ -1,0 +1,49 @@
+{
+  "origin": "https://app.example",
+  "handshakeId": "handshake-v0.1-test",
+  "dappSecretKeyHex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+  "dappPublicKeyBase64": "j0DFrbaPJWJK5bIU6nZ6bslNgp09e14a0bpvPiE4KF8=",
+  "walletSecretKeyHex": "202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f",
+  "walletPublicKeyBase64": "NYBy1jZYgNGu6jKa35EhODhR7SGijjt16WXQ0s0WYlQ=",
+  "handshakeKeyHex": "99acd5c1c2e888f8c9f70e35fa1c7ec5112e1fe92975d14902fec6720a4392f3",
+  "sessionId": "session-v0.1-test",
+  "sessionTokenBase64": "QEFCQ0RFRkdISUpLTE1OT1BRUlNUVVZXWFlaW1xdXl8=",
+  "create": {
+    "payload": {
+      "kind": "create",
+      "requestedChains": ["solana:devnet"],
+      "requestedFeatures": ["solana:signMessage", "solana:signTransaction"]
+    },
+    "nonceHex": "000102030405060708090a0b",
+    "envelope": {
+      "protocolVersion": "2",
+      "keyId": "handshake-v0.1-test",
+      "sealedBoxBase64": "AAECAwQFBgcICQoLne/vf4IPENaFg9TE8wJ0AHDpMvgsWiSrobrRXNPavGHKYTzMbyrqfCVUotz2TQH06P8T/2ZA6dw2A8SWYLfWb3D6lP+LUM0UUWrN/ZK38G13FfcnB9V8kU4ZKlPb/3IJD8Pk33zzoQVv3el2WXNdgSMSbhREHLQz3f3hAW/CYSLY9DtLaTAR+bY="
+    }
+  },
+  "createResponse": {
+    "payload": {
+      "sessionId": "session-v0.1-test",
+      "sessionTokenBase64": "QEFCQ0RFRkdISUpLTE1OT1BRUlNUVVZXWFlaW1xdXl8=",
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "accounts": [
+        {
+          "address": "11111111111111111111111111111111",
+          "publicKey": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+          "chains": ["solana:devnet"],
+          "features": ["solana:signMessage", "solana:signTransaction"],
+          "label": "Account 1"
+        }
+      ],
+      "chains": ["solana:devnet"],
+      "features": ["solana:signMessage", "solana:signTransaction"],
+      "signingPolicy": "prompt"
+    },
+    "nonceHex": "0c0d0e0f1011121314151617",
+    "envelope": {
+      "protocolVersion": "2",
+      "keyId": "handshake-v0.1-test",
+      "sealedBoxBase64": "DA0ODxAREhMUFRYXch3G7W3InXh7DRIzXMo2l0bVOWrBwdXufmgwH8Eln0grYtZ96nNjhQmu/qAIwVsYOQ3WvJCAjSbELTLs4A7U+lg6ZQ6Tta7BuKt3A1eOsG1LTMuFFzGtD4iD6naMSd1Hnzx4DtBnW5Nc62k+72/Zs9y6bxBWOJ28+sw9AEUw57WW6HfL577SisbDfuEWv8yAmirxOA1I71OIf635v2cBBOAZ0JjfFTo/AXk8y99q3o1Ynr39wocI8TYXSmry3MuJcW0lK7SLRktOMlurYgx/UNG7niy7cglg14cuVA4xpjvFZQAHH6p32umsFGX4dxsrI4s6seLJQsdgIBxbEso/bb/q+OrxFF37xOgfrMElP4fft91CsYA1UQ8IXH/Q5ovzD4OMWZCkKT7y5p5HYrLsV9F/FovpTSiIlGoeQLZN6boNjv/smRnxND3EwFUp4sP2RQbQLMlxg/c1FDXlWCyVXoS6sm29UYaSPgVEbg1e9r2ZSydSBOWspFTNQMmT3Q6424O8kYGgdRCYyULVQSogFCbBZil0XyEkKfgKLwxQlSPGqogdK7Wbr9EmL9N9gjYecKMCAIj1mcpRues0Ba08zVHsNnTshTRzrUGYFRDvXAdnV/+hDiNeU0TLkN3OWum1GeOPRHLvlZSTFX4J53l83r1NdAthT9iFxbmMBrivZw=="
+    }
+  }
+}

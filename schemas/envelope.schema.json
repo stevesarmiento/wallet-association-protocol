@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wallet-association.dev/schemas/v0.1/envelope.schema.json",
+  "type": "object",
+  "required": ["protocolVersion", "keyId", "sealedBoxBase64"],
+  "additionalProperties": false,
+  "properties": {
+    "protocolVersion": { "const": "2" },
+    "keyId": { "type": "string", "minLength": 1 },
+    "sealedBoxBase64": { "type": "string", "minLength": 1 }
+  }
+}

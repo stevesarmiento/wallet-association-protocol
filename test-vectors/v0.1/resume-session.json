@@ -1,0 +1,22 @@
+{
+  "origin": "https://app.example",
+  "handshakeId": "handshake-v0.1-test",
+  "sessionId": "session-v0.1-test",
+  "dappSecretKeyHex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+  "walletPublicKeyBase64": "NYBy1jZYgNGu6jKa35EhODhR7SGijjt16WXQ0s0WYlQ=",
+  "handshakeKeyHex": "99acd5c1c2e888f8c9f70e35fa1c7ec5112e1fe92975d14902fec6720a4392f3",
+  "sessionTokenBase64": "QEFCQ0RFRkdISUpLTE1OT1BRUlNUVVZXWFlaW1xdXl8=",
+  "resume": {
+    "payload": {
+      "kind": "resume",
+      "resumeSessionId": "session-v0.1-test",
+      "resumeSessionTokenBase64": "QEFCQ0RFRkdISUpLTE1OT1BRUlNUVVZXWFlaW1xdXl8="
+    },
+    "nonceHex": "18191a1b1c1d1e1f20212223",
+    "envelope": {
+      "protocolVersion": "2",
+      "keyId": "handshake-v0.1-test",
+      "sealedBoxBase64": "GBkaGxwdHh8gISIjGp2bGTEf+1IgKd3eWkMeMa/Yu6WTrLtnXTaMN+nCqq/O69PwhcEQQo996+lYqGaw51XKkDvmFPcEcH7ZZuFT2AIqP8bN23zi9CdZLf/zz1CaowF+AcvgbuoRDUFg8o3TB8+XdPvkiMd/Agvq5xjgoQ7vX/aEZShO+CJhYkMNdHX3laMntyafGP6GhVWRnaN3gQ=="
+    }
+  }
+}

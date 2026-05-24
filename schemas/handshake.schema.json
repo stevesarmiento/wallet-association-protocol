@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wallet-association.dev/schemas/v0.1/handshake.schema.json",
+  "$defs": {
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "origin": { "type": "string" },
+        "appName": { "type": "string" },
+        "appIcon": { "type": "string" }
+      }
+    }
+  },
+  "oneOf": [
+    {
+      "type": "object",
+      "required": ["protocolVersion", "dappPublicKeyBase64"],
+      "additionalProperties": false,
+      "properties": {
+        "protocolVersion": { "const": "2" },
+        "dappPublicKeyBase64": { "type": "string" },
+        "metadata": { "$ref": "#/$defs/metadata" }
+      }
+    },
+    {
+      "type": "object",
+      "required": ["protocolVersion", "handshakeId", "walletPublicKeyBase64", "expiresAt"],
+      "additionalProperties": false,
+      "properties": {
+        "protocolVersion": { "const": "2" },
+        "handshakeId": { "type": "string" },
+        "walletPublicKeyBase64": { "type": "string" },
+        "expiresAt": { "type": "string", "format": "date-time" }
+      }
+    }
+  ]
+}

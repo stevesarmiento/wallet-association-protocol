@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wallet-association.dev/schemas/v0.1/discover.schema.json",
+  "type": "object",
+  "required": ["name", "version", "protocolVersion", "transports", "chains", "features", "encryption", "sessionTokenTtlSeconds"],
+  "additionalProperties": false,
+  "properties": {
+    "name": { "type": "string", "minLength": 1 },
+    "version": { "type": "string", "minLength": 1 },
+    "protocolVersion": { "const": "2" },
+    "transports": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type"],
+        "additionalProperties": false,
+        "properties": {
+          "type": { "type": "string", "minLength": 1 },
+          "host": { "type": "string" },
+          "port": { "type": "integer", "minimum": 1, "maximum": 65535 }
+        }
+      }
+    },
+    "chains": { "type": "array", "items": { "type": "string" } },
+    "features": { "type": "array", "items": { "type": "string" } },
+    "encryption": { "const": "x25519-hkdf-sha256-chacha20poly1305" },
+    "sessionTokenTtlSeconds": { "type": "integer", "minimum": 1 }
+  }
+}
