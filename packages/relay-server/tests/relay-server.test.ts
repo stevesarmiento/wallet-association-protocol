@@ -50,6 +50,42 @@ describe("reference relay server", () => {
     wallet.close();
   });
 
+  it("allows browser dapps to create rooms across origins", async () => {
+    server = await startRelayServer();
+
+    const preflight = await fetch(`${server.httpUrl}/v2/rooms`, {
+      method: "OPTIONS",
+      headers: {
+        Origin: "http://localhost:3000",
+        "Access-Control-Request-Method": "POST",
+        "Access-Control-Request-Headers": "content-type",
+      },
+    });
+    expect(preflight.status).toBe(204);
+    expect(preflight.headers.get("access-control-allow-origin")).toBe(
+      "http://localhost:3000",
+    );
+    expect(preflight.headers.get("access-control-allow-methods")).toContain(
+      "POST",
+    );
+
+    const roomResponse = await fetch(`${server.httpUrl}/v2/rooms`, {
+      method: "POST",
+      headers: {
+        Origin: "http://localhost:3000",
+        "Content-Type": "application/json",
+      },
+      body: "{}",
+    });
+    expect(roomResponse.ok).toBe(true);
+    expect(roomResponse.headers.get("access-control-allow-origin")).toBe(
+      "http://localhost:3000",
+    );
+    await expect(roomResponse.json()).resolves.toMatchObject({
+      protocolVersion: "2",
+    });
+  });
+
   it("rejects duplicate roles", async () => {
     server = await startRelayServer();
     const room = await fetch(`${server.httpUrl}/v2/rooms`, {

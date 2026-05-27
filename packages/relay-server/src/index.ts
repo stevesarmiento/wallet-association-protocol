@@ -173,6 +173,13 @@ function handleHttp(
   host: string,
   server: Server,
 ) {
+  setCorsHeaders(request, response);
+  if (request.method === "OPTIONS") {
+    response.statusCode = 204;
+    response.end();
+    return;
+  }
+
   const url = new URL(request.url ?? "/", `http://${host}`);
   if (request.method === "GET" && url.pathname === "/v2/health") {
     respondJson(response, 200, { status: "ok" });
@@ -198,6 +205,13 @@ function handleHttp(
   respondJson(response, 404, {
     error: { code: "not_found", message: "not found" },
   });
+}
+
+function setCorsHeaders(request: IncomingMessage, response: ServerResponse) {
+  response.setHeader("Access-Control-Allow-Origin", request.headers.origin ?? "*");
+  response.setHeader("Vary", "Origin");
+  response.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  response.setHeader("Access-Control-Allow-Headers", "Content-Type");
 }
 
 function respondJson(response: ServerResponse, status: number, body: unknown) {
