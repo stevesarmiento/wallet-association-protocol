@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wallet-association.dev/schemas/v0.2/relay-room.schema.json",
+  "type": "object",
+  "required": ["protocolVersion", "roomId", "roomSecret", "webSocketUrl", "expiresAt"],
+  "additionalProperties": false,
+  "properties": {
+    "protocolVersion": { "const": "2" },
+    "roomId": { "type": "string", "minLength": 1 },
+    "roomSecret": { "type": "string", "minLength": 1 },
+    "webSocketUrl": { "type": "string", "pattern": "^wss?://" },
+    "expiresAt": { "type": "string", "format": "date-time" }
+  }
+}

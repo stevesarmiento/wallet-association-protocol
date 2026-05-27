@@ -21,6 +21,13 @@ public enum AssociationProtocol {
     ]
 }
 
+public enum AssociationOperation: String, Codable, Equatable, Sendable {
+    case discover
+    case handshake
+    case associate
+    case rpc
+}
+
 public struct AssociationTransportDescriptor: Codable, Equatable, Sendable {
     public let type: String
     public let host: String?

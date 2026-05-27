@@ -35,10 +35,22 @@ Version 0.1 supports:
 - Solana sign transaction
 - Wallet Standard adapter
 
+Version 0.2 adds experimental relay rendezvous building blocks:
+
+- transport-neutral client request interface
+- relay connection URI parsing/generation
+- local reference relay server
+- TypeScript relay dapp transport
+- Swift relay wallet bridge
+- encrypted session events
+- session token rotation RPC
+
 ## Packages
 
 - `@wallet-association/core`: protocol types, crypto, envelopes, validation, errors
 - `@wallet-association/transport-localhost`: localhost discovery and HTTP transport
+- `@wallet-association/transport-relay`: browser relay rendezvous transport
+- `@wallet-association/relay-server`: local reference relay server
 - `@wallet-association/wallet-standard`: Wallet Standard adapter
 
 ## Reference Implementations
@@ -65,11 +77,14 @@ Native can consume the local Swift package with:
 - [Security v0.1](./specs/security-v0.1.md)
 - [Localhost Transport v0.1](./specs/localhost-transport-v0.1.md)
 - [Wallet Standard Adapter v0.1](./specs/wallet-standard-adapter-v0.1.md)
+- [Transport Abstraction v0.2](./specs/transport-abstraction-v0.2.md)
+- [Relay Transport v0.2](./specs/relay-transport-v0.2.md)
+- [Connection URI v0.2](./specs/connection-uri-v0.2.md)
+- [Events v0.2](./specs/events-v0.2.md)
+- [Session Rotation v0.2](./specs/session-rotation-v0.2.md)
 
 ## Future Work
 
-- QR/deeplink transport
-- relay transport
 - WebRTC transport
 - non-Solana feature namespaces
 - formal Wallet Standard proposal

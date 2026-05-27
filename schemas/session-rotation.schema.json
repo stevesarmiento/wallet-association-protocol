@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wallet-association.dev/schemas/v0.2/session-rotation.schema.json",
+  "oneOf": [
+    {
+      "type": "object",
+      "required": ["reason"],
+      "additionalProperties": false,
+      "properties": {
+        "reason": { "enum": ["dapp_requested"] }
+      }
+    },
+    {
+      "type": "object",
+      "required": ["sessionId", "sessionTokenBase64", "expiresAt"],
+      "additionalProperties": false,
+      "properties": {
+        "sessionId": { "type": "string" },
+        "sessionTokenBase64": { "type": "string", "minLength": 44, "maxLength": 44 },
+        "expiresAt": { "type": "string", "format": "date-time" }
+      }
+    }
+  ]
+}

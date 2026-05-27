@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wallet-association.dev/schemas/v0.2/session-event.schema.json",
+  "type": "object",
+  "required": ["eventId", "issuedAt", "sessionTokenBase64", "type"],
+  "additionalProperties": false,
+  "properties": {
+    "eventId": { "type": "string" },
+    "issuedAt": { "type": "string", "format": "date-time" },
+    "sessionTokenBase64": { "type": "string", "minLength": 44, "maxLength": 44 },
+    "type": {
+      "enum": [
+        "session_revoked",
+        "accounts_changed",
+        "chains_changed",
+        "features_changed",
+        "wallet_locked",
+        "wallet_unlocked"
+      ]
+    },
+    "accounts": { "type": "array" },
+    "chains": { "type": "array", "items": { "type": "string" } },
+    "features": { "type": "array", "items": { "type": "string" } }
+  }
+}

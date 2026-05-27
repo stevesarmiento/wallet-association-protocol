@@ -1,0 +1,38 @@
+{
+  "name": "@wallet-association/transport-relay",
+  "version": "0.1.0",
+  "description": "Relay rendezvous transport for Wallet Association Protocol.",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist/**"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@wallet-association/core": "file:../core"
+  },
+  "devDependencies": {
+    "@wallet-association/relay-server": "file:../relay-server",
+    "@wallet-association/wallet-standard": "file:../wallet-standard",
+    "@types/ws": "^8.18.1",
+    "tsup": "^8.5.0",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.7",
+    "ws": "^8.18.3"
+  },
+  "license": "MIT"
+}

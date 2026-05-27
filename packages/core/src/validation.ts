@@ -6,14 +6,16 @@ import {
   type AssociationEnvelope,
   type AssociationRPCRequestPayload,
   type AssociationRequestPayload,
-  type AssociationResponsePayload
+  type AssociationResponsePayload,
 } from "./protocol";
 import { isSolanaChain } from "./protocol";
 import { isValidSessionTokenBase64 } from "./session";
 
 export { isAssociationEnvelope };
 
-export function isCompatibleDiscovery(value: unknown): value is AssociationDiscoverResponse {
+export function isCompatibleDiscovery(
+  value: unknown,
+): value is AssociationDiscoverResponse {
   if (!value || typeof value !== "object") return false;
   const response = value as Partial<AssociationDiscoverResponse>;
   return (
@@ -31,26 +33,34 @@ export function isCompatibleDiscovery(value: unknown): value is AssociationDisco
   );
 }
 
-export function assertAssociationEnvelope(value: unknown): asserts value is AssociationEnvelope {
+export function assertAssociationEnvelope(
+  value: unknown,
+): asserts value is AssociationEnvelope {
   if (!isAssociationEnvelope(value)) {
     throw new Error("Invalid association envelope");
   }
 }
 
-export function isAssociationRequestPayload(value: unknown): value is AssociationRequestPayload {
+export function isAssociationRequestPayload(
+  value: unknown,
+): value is AssociationRequestPayload {
   if (!value || typeof value !== "object") return false;
   const payload = value as Partial<AssociationRequestPayload>;
   return payload.kind === "create" || payload.kind === "resume";
 }
 
-export function validateAssociationRequestPayload(value: unknown): AssociationRequestPayload {
+export function validateAssociationRequestPayload(
+  value: unknown,
+): AssociationRequestPayload {
   if (!isAssociationRequestPayload(value)) {
     throw new Error("Invalid association request payload");
   }
   return value;
 }
 
-export function isAssociationResponsePayload(value: unknown): value is AssociationResponsePayload {
+export function isAssociationResponsePayload(
+  value: unknown,
+): value is AssociationResponsePayload {
   if (!value || typeof value !== "object") return false;
   const payload = value as Partial<AssociationResponsePayload>;
   return (
@@ -60,24 +70,31 @@ export function isAssociationResponsePayload(value: unknown): value is Associati
     Array.isArray(payload.accounts) &&
     Array.isArray(payload.chains) &&
     Array.isArray(payload.features) &&
-    (payload.signingPolicy === "prompt" || payload.signingPolicy === "allowWithoutPrompt")
+    (payload.signingPolicy === "prompt" ||
+      payload.signingPolicy === "allowWithoutPrompt")
   );
 }
 
-export function isAssociationRPCRequestPayload(value: unknown): value is AssociationRPCRequestPayload {
+export function isAssociationRPCRequestPayload(
+  value: unknown,
+): value is AssociationRPCRequestPayload {
   if (!value || typeof value !== "object") return false;
   const payload = value as Partial<AssociationRPCRequestPayload>;
   return (
     typeof payload.requestId === "string" &&
     typeof payload.issuedAt === "string" &&
     isValidSessionTokenBase64(payload.sessionTokenBase64) &&
-    (payload.method === "solana.signMessage" || payload.method === "solana.signTransaction") &&
+    (payload.method === "solana.signMessage" ||
+      payload.method === "solana.signTransaction" ||
+      payload.method === "wallet.session.rotate") &&
     typeof payload.params === "object" &&
     payload.params !== null
   );
 }
 
-export function validateAssociationRPCRequestPayload(value: unknown): AssociationRPCRequestPayload {
+export function validateAssociationRPCRequestPayload(
+  value: unknown,
+): AssociationRPCRequestPayload {
   if (!isAssociationRPCRequestPayload(value)) {
     throw new Error("Invalid association RPC request payload");
   }

@@ -140,12 +140,14 @@ public struct AssociationResponsePayload: Codable, Equatable, Sendable {
 public enum AssociationRPCParams: Codable, Equatable, Sendable {
     case signMessage(AssociationSignMessageParams)
     case signTransaction(AssociationSignTransactionParams)
+    case sessionRotation(AssociationSessionRotationRequest)
 
     private enum CodingKeys: String, CodingKey {
         case accountAddress
         case chain
         case messageBase64
         case transactionBase64
+        case reason
     }
 
     public init(from decoder: Decoder) throws {
@@ -166,6 +168,10 @@ public enum AssociationRPCParams: Codable, Equatable, Sendable {
             ))
             return
         }
+        if let reason = try container.decodeIfPresent(String.self, forKey: .reason) {
+            self = .sessionRotation(AssociationSessionRotationRequest(reason: reason))
+            return
+        }
         throw WalletAssociationError.malformedRequest
     }
 
@@ -180,6 +186,8 @@ public enum AssociationRPCParams: Codable, Equatable, Sendable {
             try container.encode(params.accountAddress, forKey: .accountAddress)
             try container.encodeIfPresent(params.chain, forKey: .chain)
             try container.encode(params.transactionBase64, forKey: .transactionBase64)
+        case .sessionRotation(let params):
+            try container.encode(params.reason, forKey: .reason)
         }
     }
 }
@@ -233,11 +241,15 @@ public struct AssociationRPCRequestPayload: Codable, Equatable, Sendable {
 public enum AssociationRPCResult: Codable, Equatable, Sendable {
     case signMessage(AssociationSignMessageResponse)
     case signTransaction(AssociationSignTransactionResponse)
+    case sessionRotation(AssociationSessionRotationResponse)
 
     private enum CodingKeys: String, CodingKey {
         case signatureBase64
         case signedTransactionBase64
         case signature
+        case sessionId
+        case sessionTokenBase64
+        case expiresAt
     }
 
     public init(from decoder: Decoder) throws {
@@ -246,6 +258,14 @@ public enum AssociationRPCResult: Codable, Equatable, Sendable {
             self = .signTransaction(AssociationSignTransactionResponse(
                 signedTransactionBase64: signedTransactionBase64,
                 signature: try container.decode(String.self, forKey: .signature)
+            ))
+            return
+        }
+        if let sessionId = try container.decodeIfPresent(String.self, forKey: .sessionId) {
+            self = .sessionRotation(AssociationSessionRotationResponse(
+                sessionId: sessionId,
+                sessionTokenBase64: try container.decode(String.self, forKey: .sessionTokenBase64),
+                expiresAt: try container.decode(Date.self, forKey: .expiresAt)
             ))
             return
         }
@@ -262,6 +282,10 @@ public enum AssociationRPCResult: Codable, Equatable, Sendable {
         case .signTransaction(let response):
             try container.encode(response.signedTransactionBase64, forKey: .signedTransactionBase64)
             try container.encode(response.signature, forKey: .signature)
+        case .sessionRotation(let response):
+            try container.encode(response.sessionId, forKey: .sessionId)
+            try container.encode(response.sessionTokenBase64, forKey: .sessionTokenBase64)
+            try container.encode(response.expiresAt, forKey: .expiresAt)
         }
     }
 }
@@ -294,3 +318,59 @@ public struct AssociationSignTransactionResponse: Codable, Equatable, Sendable {
     }
 }
 
+public struct AssociationSessionRotationRequest: Codable, Equatable, Sendable {
+    public let reason: String
+
+    public init(reason: String = "dapp_requested") {
+        self.reason = reason
+    }
+}
+
+public struct AssociationSessionRotationResponse: Codable, Equatable, Sendable {
+    public let sessionId: String
+    public let sessionTokenBase64: String
+    public let expiresAt: Date
+
+    public init(sessionId: String, sessionTokenBase64: String, expiresAt: Date) {
+        self.sessionId = sessionId
+        self.sessionTokenBase64 = sessionTokenBase64
+        self.expiresAt = expiresAt
+    }
+}
+
+public enum AssociationSessionEventType: String, Codable, Equatable, Sendable {
+    case sessionRevoked = "session_revoked"
+    case accountsChanged = "accounts_changed"
+    case chainsChanged = "chains_changed"
+    case featuresChanged = "features_changed"
+    case walletLocked = "wallet_locked"
+    case walletUnlocked = "wallet_unlocked"
+}
+
+public struct AssociationSessionEventPayload: Codable, Equatable, Sendable {
+    public let eventId: String
+    public let issuedAt: Date
+    public let sessionTokenBase64: String
+    public let type: AssociationSessionEventType
+    public let accounts: [BridgeAccountResponse]?
+    public let chains: [String]?
+    public let features: [String]?
+
+    public init(
+        eventId: String,
+        issuedAt: Date = Date(),
+        sessionTokenBase64: String,
+        type: AssociationSessionEventType,
+        accounts: [BridgeAccountResponse]? = nil,
+        chains: [String]? = nil,
+        features: [String]? = nil
+    ) {
+        self.eventId = eventId
+        self.issuedAt = issuedAt
+        self.sessionTokenBase64 = sessionTokenBase64
+        self.type = type
+        self.accounts = accounts
+        self.chains = chains
+        self.features = features
+    }
+}

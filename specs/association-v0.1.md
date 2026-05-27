@@ -4,6 +4,10 @@ Wallet Association Protocol creates encrypted, user-approved wallet sessions ove
 replaceable transports. Version 0.1 defines the message layer used by the
 localhost transport and the Wallet Standard adapter.
 
+Version 0.2 keeps the v0.1 localhost behavior compatible and adds relay
+rendezvous, encrypted wallet events, and session rotation as optional transport
+and RPC extensions.
+
 ## Terms
 
 - **Dapp**: Application requesting wallet accounts or signing.

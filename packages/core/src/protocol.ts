@@ -1,5 +1,6 @@
 export const WALLET_ASSOCIATION_PROTOCOL_VERSION = "2" as const;
-export const WALLET_ASSOCIATION_ENCRYPTION = "x25519-hkdf-sha256-chacha20poly1305" as const;
+export const WALLET_ASSOCIATION_ENCRYPTION =
+  "x25519-hkdf-sha256-chacha20poly1305" as const;
 export const WALLET_ASSOCIATION_HANDSHAKE_TTL_SECONDS = 5 * 60;
 export const WALLET_ASSOCIATION_SESSION_TTL_SECONDS = 7 * 24 * 60 * 60;
 export const WALLET_ASSOCIATION_RPC_CLOCK_SKEW_SECONDS = 60;
@@ -8,6 +9,29 @@ export interface AssociationTransportDescriptor {
   type: string;
   host?: string;
   port?: number;
+  url?: string;
+}
+
+export type AssociationOperation =
+  | "discover"
+  | "handshake"
+  | "associate"
+  | "rpc";
+
+export interface AssociationTransportEvent {
+  type: "session_event" | "peer_connected" | "peer_disconnected" | "closed";
+  body?: unknown;
+}
+
+export interface AssociationClientTransport {
+  readonly type: string;
+  request<T>(
+    operation: AssociationOperation,
+    body?: unknown,
+    options?: { signal?: AbortSignal },
+  ): Promise<T>;
+  onEvent?(listener: (event: AssociationTransportEvent) => void): () => void;
+  close?(): Promise<void> | void;
 }
 
 export interface AssociationDiscoverResponse {
@@ -77,7 +101,22 @@ export interface AssociationResponsePayload {
   signingPolicy: AssociationSigningPolicy;
 }
 
-export type AssociationRPCMethod = "solana.signMessage" | "solana.signTransaction";
+export type AssociationRPCMethod =
+  | "solana.signMessage"
+  | "solana.signTransaction"
+  | "wallet.session.rotate";
+
+export type AssociationSessionRotationReason = "dapp_requested";
+
+export interface AssociationSessionRotationParams {
+  reason: AssociationSessionRotationReason;
+}
+
+export interface AssociationSessionRotationResponse {
+  sessionId: string;
+  sessionTokenBase64: string;
+  expiresAt: string;
+}
 
 export interface AssociationRPCRequestPayload {
   requestId: string;
@@ -85,10 +124,11 @@ export interface AssociationRPCRequestPayload {
   sessionTokenBase64: string;
   method: AssociationRPCMethod;
   params: {
-    accountAddress: string;
+    accountAddress?: string;
     chain?: string;
     messageBase64?: string;
     transactionBase64?: string;
+    reason?: AssociationSessionRotationReason;
   };
 }
 
@@ -100,7 +140,29 @@ export type AssociationRPCResponsePayload =
   | {
       requestId: string;
       result: { signedTransactionBase64: string; signature: string };
+    }
+  | {
+      requestId: string;
+      result: AssociationSessionRotationResponse;
     };
+
+export type AssociationSessionEventType =
+  | "session_revoked"
+  | "accounts_changed"
+  | "chains_changed"
+  | "features_changed"
+  | "wallet_locked"
+  | "wallet_unlocked";
+
+export interface AssociationSessionEventPayload {
+  eventId: string;
+  issuedAt: string;
+  sessionTokenBase64: string;
+  type: AssociationSessionEventType;
+  accounts?: AssociationAccount[];
+  chains?: string[];
+  features?: string[];
+}
 
 export interface AssociationErrorBody {
   error: {

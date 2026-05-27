@@ -253,10 +253,14 @@ public final class LocalAssociationBridge: @unchecked Sendable {
             throw WalletAssociationError.sessionTokenInvalid
         }
         try replayCache.validate(payload, sessionId: envelope.keyId)
-        let response = try await delegate.associationRPC(
-            payload,
-            session: AssociationSessionContext(sessionId: envelope.keyId, origin: origin)
-        )
+        let session = AssociationSessionContext(sessionId: envelope.keyId, origin: origin)
+        let response: AssociationRPCResponsePayload
+        if payload.method == "wallet.session.rotate", case .sessionRotation(let request) = payload.params {
+            let result = try await delegate.associationRotateSessionToken(request, session: session)
+            response = AssociationRPCResponsePayload(requestId: payload.requestId, result: .sessionRotation(result))
+        } else {
+            response = try await delegate.associationRPC(payload, session: session)
+        }
         let sealed = try AssociationCrypto.seal(response, key: key, encoder: encoder)
         return AssociationEnvelope(protocolVersion: Self.protocolVersion, keyId: envelope.keyId, sealedBoxBase64: sealed)
     }

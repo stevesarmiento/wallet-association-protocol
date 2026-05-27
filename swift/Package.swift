@@ -10,7 +10,8 @@ let package = Package(
     ],
     products: [
         .library(name: "WalletAssociationCore", targets: ["WalletAssociationCore"]),
-        .library(name: "WalletAssociationLocalhost", targets: ["WalletAssociationLocalhost"])
+        .library(name: "WalletAssociationLocalhost", targets: ["WalletAssociationLocalhost"]),
+        .library(name: "WalletAssociationRelay", targets: ["WalletAssociationRelay"])
     ],
     targets: [
         .target(
@@ -22,6 +23,11 @@ let package = Package(
             dependencies: ["WalletAssociationCore"],
             path: "Sources/WalletAssociationLocalhost"
         ),
+        .target(
+            name: "WalletAssociationRelay",
+            dependencies: ["WalletAssociationCore"],
+            path: "Sources/WalletAssociationRelay"
+        ),
         .testTarget(
             name: "WalletAssociationCoreTests",
             dependencies: ["WalletAssociationCore"],
@@ -31,6 +37,11 @@ let package = Package(
             name: "WalletAssociationLocalhostTests",
             dependencies: ["WalletAssociationCore", "WalletAssociationLocalhost"],
             path: "Tests/WalletAssociationLocalhostTests"
+        ),
+        .testTarget(
+            name: "WalletAssociationRelayTests",
+            dependencies: ["WalletAssociationCore", "WalletAssociationRelay"],
+            path: "Tests/WalletAssociationRelayTests"
         )
     ]
 )

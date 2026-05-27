@@ -10,7 +10,7 @@
         "requestId": { "type": "string" },
         "issuedAt": { "type": "string", "format": "date-time" },
         "sessionTokenBase64": { "type": "string", "minLength": 44, "maxLength": 44 },
-        "method": { "enum": ["solana.signMessage", "solana.signTransaction"] },
+        "method": { "enum": ["solana.signMessage", "solana.signTransaction", "wallet.session.rotate"] },
         "params": {
           "type": "object",
           "required": ["accountAddress"],
@@ -19,7 +19,8 @@
             "accountAddress": { "type": "string" },
             "chain": { "type": "string" },
             "messageBase64": { "type": "string" },
-            "transactionBase64": { "type": "string" }
+            "transactionBase64": { "type": "string" },
+            "reason": { "enum": ["dapp_requested"] }
           }
         }
       }
@@ -45,6 +46,16 @@
               "properties": {
                 "signedTransactionBase64": { "type": "string" },
                 "signature": { "type": "string" }
+              }
+            },
+            {
+              "type": "object",
+              "required": ["sessionId", "sessionTokenBase64", "expiresAt"],
+              "additionalProperties": false,
+              "properties": {
+                "sessionId": { "type": "string" },
+                "sessionTokenBase64": { "type": "string", "minLength": 44, "maxLength": 44 },
+                "expiresAt": { "type": "string", "format": "date-time" }
               }
             }
           ]

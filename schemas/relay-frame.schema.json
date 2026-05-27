@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wallet-association.dev/schemas/v0.2/relay-frame.schema.json",
+  "oneOf": [
+    {
+      "type": "object",
+      "required": ["kind", "roomId", "role", "peerConnected"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "const": "joined" },
+        "roomId": { "type": "string" },
+        "role": { "enum": ["dapp", "wallet"] },
+        "peerConnected": { "type": "boolean" }
+      }
+    },
+    {
+      "type": "object",
+      "required": ["kind", "role"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "enum": ["peer_joined", "peer_left"] },
+        "role": { "enum": ["dapp", "wallet"] }
+      }
+    },
+    {
+      "type": "object",
+      "required": ["kind", "id", "operation"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "const": "wap_request" },
+        "id": { "type": "string", "pattern": "^[A-Za-z0-9._:-]{1,128}$" },
+        "operation": { "enum": ["discover", "handshake", "associate", "rpc"] },
+        "body": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": ["kind", "id", "ok", "body"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "const": "wap_response" },
+        "id": { "type": "string", "pattern": "^[A-Za-z0-9._:-]{1,128}$" },
+        "ok": { "const": true },
+        "body": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": ["kind", "id", "ok", "error"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "const": "wap_response" },
+        "id": { "type": "string", "pattern": "^[A-Za-z0-9._:-]{1,128}$" },
+        "ok": { "const": false },
+        "error": {
+          "type": "object",
+          "required": ["error"],
+          "properties": {
+            "error": {
+              "type": "object",
+              "required": ["code", "message"],
+              "properties": {
+                "code": { "type": "string" },
+                "message": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": ["kind", "id", "body"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "const": "wap_event" },
+        "id": { "type": "string", "pattern": "^[A-Za-z0-9._:-]{1,128}$" },
+        "body": { "type": "object" }
+      }
+    },
+    {
+      "type": "object",
+      "required": ["kind"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "enum": ["ping", "pong"] }
+      }
+    }
+  ]
+}

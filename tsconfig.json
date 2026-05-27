@@ -17,8 +17,18 @@
     "baseUrl": ".",
     "paths": {
       "@wallet-association/core": ["packages/core/src/index.ts"],
-      "@wallet-association/transport-localhost": ["packages/transport-localhost/src/index.ts"],
-      "@wallet-association/wallet-standard": ["packages/wallet-standard/src/index.ts"]
+      "@wallet-association/transport-localhost": [
+        "packages/transport-localhost/src/index.ts"
+      ],
+      "@wallet-association/transport-relay": [
+        "packages/transport-relay/src/index.ts"
+      ],
+      "@wallet-association/relay-server": [
+        "packages/relay-server/src/index.ts"
+      ],
+      "@wallet-association/wallet-standard": [
+        "packages/wallet-standard/src/index.ts"
+      ]
     }
   }
 }
